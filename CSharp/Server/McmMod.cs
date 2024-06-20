@@ -175,7 +175,8 @@ namespace MultiplayerCrewManager
                         return null;
                     }
 
-                    if (false == GameMain.Server.ServerSettings.AllowRespawn)
+                    var allowMissionRespawn = GameMain.GameSession.GameMode is not MissionMode missionMode || false == missionMode.Missions.Any(m => false == m.AllowRespawn);
+                    if (allowMissionRespawn)
                     {
                         return null;
                     }

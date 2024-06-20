@@ -258,7 +258,9 @@ namespace MultiplayerCrewManager
             McmUtils.Info("Saving players (pre-process)");
             var crewManager = GameMain.GameSession?.CrewManager;
             var str = "Saving crew characters:";
-
+            
+            var allowMissionRespawn = GameMain.GameSession.GameMode is not MissionMode missionMode || false == missionMode.Missions.Any(m => false == m.AllowRespawn);
+            
             Control.UpdateAwaiting();
             // remove actual
             CharacterData.Clear();
@@ -278,14 +280,14 @@ namespace MultiplayerCrewManager
                         CharacterData.Add(charData);
                         str += $"\n    {character.ID} | {character.Name} - OK";
                     }
-                    else if (false == GameMain.Server.ServerSettings.AllowRespawn)
+                    else if (false == allowMissionRespawn)
                     {
                         str += $"\n    {character.ID} | {character.Name} - Dead";
                     }
                 }
             }
             // add dead
-            if (GameMain.Server.ServerSettings.AllowRespawn)
+            if (allowMissionRespawn)
             {
                 foreach (var charInfo in Control.Awaiting)
                 {

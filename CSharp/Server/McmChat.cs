@@ -185,8 +185,8 @@ namespace MultiplayerCrewManager
                 messageType = ChatMessageType.Server;
                 Int32.TryParse(rMaskIntValue.Match(message).Value, out int penalty);
                 response = $"[MCM] Respawn penalty is set to {penalty}%";
-                McmMod.Config.SkillLossPercentageOnDeath = Math.Max((float)penalty, 0);
-                McmMod.SaveConfig();
+                //McmMod.Config.SkillLossPercentageOnDeath = Math.Max((float)penalty, 0);
+                //McmMod.SaveConfig();
             }
             else (messageType, response) = SetPrivilegeError();
 
@@ -314,7 +314,7 @@ namespace MultiplayerCrewManager
                 messageType = ChatMessageType.Server;
                 Int32.TryParse(rMaskIntValue.Match(message).Value, out int time);
                 response = $"[MCM] Respawn shuttle catch-up time is set to {time} seconds";
-                McmMod.Config.MaxTransportTime = (float)time;
+                //McmMod.Config.MaxTransportTime = (float)time;
 
             }
             else (messageType, response) = SetPrivilegeError();
@@ -331,8 +331,8 @@ namespace MultiplayerCrewManager
                 messageType = ChatMessageType.Server;
                 Int32.TryParse(rMaskIntValue.Match(message).Value, out int interval);
                 response = $"[MCM] Respawn interval is set to {interval} seconds";
-                McmMod.Config.RespawnInterval = (float)interval;
-                McmMod.SaveConfig();
+                //McmMod.Config.RespawnInterval = (float)interval;
+                //McmMod.SaveConfig();
             }
             else (messageType, response) = SetPrivilegeError();
 
@@ -349,8 +349,8 @@ namespace MultiplayerCrewManager
                 Boolean.TryParse(rMaskBoolValue.Match(message).Value, out bool value);
                 if (value) response = "[MCM] Respawning is turned ON";
                 else response = "[MCM] Respawning is turned OFF";
-                McmMod.Config.AllowRespawn = value;
-                McmMod.SaveConfig();
+                //McmMod.Config.AllowRespawn = value;
+                //McmMod.SaveConfig();
             }
             else (messageType, response) = SetPrivilegeError();
 

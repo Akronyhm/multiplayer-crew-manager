@@ -219,7 +219,8 @@ namespace MultiplayerCrewManager
             if (!McmMod.IsCampaign) return null;
             if (RespawnManager != self) RespawnManager = self;
 
-            if (GameMain.Server.ServerSettings.AllowRespawn)
+            var allowMissionRespawn = GameMain.GameSession.GameMode is not MissionMode missionMode || false == missionMode.Missions.Any(m => false == m.AllowRespawn);
+            if (allowMissionRespawn)
             {
                 counter--;
                 if (counter <= 0)
