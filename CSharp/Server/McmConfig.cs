@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
 using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 using Barotrauma;
 using Barotrauma.Networking;
 
@@ -23,48 +25,33 @@ namespace MultiplayerCrewManager
         public bool SecureEnabled = false;
         //public float RespawnDelay = 5;
 
-        private readonly PropertyInfo maxTransportTime;
-        private readonly PropertyInfo respawnInterval;
-        private readonly PropertyInfo skillLossPercentageOnDeath;
 
         public McmConfig()
         {
-            maxTransportTime = typeof(ServerSettings).GetProperty("MaxTransportTime");
-            if (maxTransportTime is null)
-                throw new ApplicationException($"{typeof(McmConfig)} constructor. Could not perform GetProperty on ServerSettings.MaxTransportTime");
-
-            respawnInterval = typeof(ServerSettings).GetProperty("RespawnInterval");
-            if (respawnInterval is null)
-                throw new ApplicationException($"{typeof(McmConfig)} constructor. Could not perform GetProperty on ServerSettings.RespawnInterval");
-
-            skillLossPercentageOnDeath = typeof(ServerSettings).GetProperty("SkillLossPercentageOnDeath");
-            if (skillLossPercentageOnDeath is null)
-                throw new ApplicationException($"{typeof(McmConfig)} constructor. Could not perform GetProperty on ServerSettings.RespawnInterval");
-
         }
 
         public float MaxTransportTime
         {
-            get => GameMain.Server.ServerSettings.MaxTransportTime;
-            set => maxTransportTime.SetValue(GameMain.Server.ServerSettings, value);
+            get => GameMain.NetworkMember.ServerSettings.MaxTransportTime;
         }
 
         public float RespawnInterval
         {
-            get => GameMain.Server.ServerSettings.RespawnInterval;
-            set => respawnInterval.SetValue(GameMain.Server.ServerSettings, value);
+            get => GameMain.NetworkMember.ServerSettings.RespawnInterval;
         }
 
         public bool AllowRespawn
         {
-            get => GameMain.Server.ServerSettings.AllowRespawn;
-            set => GameMain.Server.ServerSettings.AllowRespawn = value;
+            get
+            {
+                var allowMissionRespawn = GameMain.GameSession.GameMode is not MissionMode missionMode || false == missionMode.Missions.Any(m => false == m.AllowRespawn);
+                return allowMissionRespawn;
+            }
         }
 
         public float SkillLossPercentageOnDeath
         {
-            get => GameMain.Server.ServerSettings.SkillLossPercentageOnDeath;
-            set => skillLossPercentageOnDeath.SetValue(GameMain.Server.ServerSettings, value);
+            get => GameMain.NetworkMember.ServerSettings.SkillLossPercentageOnDeath;
         }
 
         public override string ToString()
@@ -98,36 +85,37 @@ namespace MultiplayerCrewManager
 
         public static void LoadConfig()
         {
-            var cfgFilePath = System.IO.Path.Combine(ACsMod.GetStoreFolder<McmMod>(), "McmConfig.xml");
+            var cfgFilePath = System.IO.Path.Combine(McmUtils.GetModStoreDirectory(), "McmConfig.xml");
             try
             {
                 if (System.IO.File.Exists(cfgFilePath))
                 {
+                    McmUtils.Raw("Loading config file...");
                     var serializer = new XmlSerializer(typeof(McmConfig));
                     using (var fstream = System.IO.File.OpenRead(cfgFilePath))
                     {
                         Config = (McmConfig)serializer.Deserialize(fstream);
-                        McmUtils.Trace($"Loaded config file:\n   [{Config.ToString()}]");
+                        //McmUtils.Raw($"Loaded config file:\n   [{Config.ToString()}]");
                     }
                 }
                 else
                 {
                     Config = new McmConfig();
-                    McmUtils.Info("Generating new MCM config file");
+                    McmUtils.Raw("Generating new MCM config file");
                     SaveConfig();
                 }
             }
             catch (System.Exception e)
             {
                 Config = new McmConfig();
-                McmUtils.Error(e, "Error while loading config");
+                McmUtils.Raw(e, "Error while loading config");
                 SaveConfig();
             }
         }
 
         public static void SaveConfig()
         {
-            var cfgFilePath = System.IO.Path.Combine(ACsMod.GetStoreFolder<McmMod>(), "McmConfig.xml");
+            var cfgFilePath = System.IO.Path.Combine(McmUtils.GetModStoreDirectory(), "McmConfig.xml");
             if (false == string.IsNullOrWhiteSpace(cfgFilePath))
             {
                 try
@@ -136,7 +124,7 @@ namespace MultiplayerCrewManager
                     using (var fstream = new System.IO.StreamWriter(cfgFilePath))
                     {
                         serializer.Serialize(fstream, Config);
-                        McmUtils.Trace("Saved config file");
+                        McmUtils.Raw("Saved config file");
                     }
                 }
                 catch (Exception e)
